@@ -1,0 +1,55 @@
+﻿@model IEnumerable<Landlyst.Models.RoomModel>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.RoomNumber)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Price)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Addition)
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                <button class="btn btn-primary" id="@item.RoomNumber" value="Reserver" onclick="ReservationFunc(this.id)">Reserver</button>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RoomNumber)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                @foreach (var item1 in item.Addition)
+                {
+                <td>
+                    @Html.DisplayFor(additionItem => item1.Addition)
+                </td>
+                <td>
+                    @Html.DisplayFor(additionItem => item1.AdditionPrice)
+                </td>
+            }
+            </tr>
+        }
+
+</table>
+
+<div id="reserveDiv">
+
+</div>
+
+<script>
+    var roomNumberValue = 0;
+
+    function ReservationFunc(RoomNumber) {
+        var url = "@Html.Raw(Url.Action("GetReservation", "Reservation", new { roomNumber = "ROOMNUMBER"}))";
+        roomNumberValue = RoomNumber;
+        $("#reserveDiv").load(url);
+    };
+</script>
