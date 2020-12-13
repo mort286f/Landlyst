@@ -1,0 +1,34 @@
+if exists	(select * from sys.objects where type ='TR' and name = 'trg_ReservAudit')
+	drop trigger [dbo].[trg_ReservAuditl]
+GO
+create trigger trg_ReservAudit on Reservation for insert, update, delete
+
+	as
+	set nocount on
+
+BEGIN
+
+	declare @trg_username varchar(50);
+	declare @audit_action varchar(100);
+	declare @audit_timestamp datetime;
+
+	select @trg_username = SYSTEM_USER;
+	select @audit_timestamp = GETDATE();
+
+	if exists (select * from inserted) and exists (select * from deleted)
+		select @audit_action = 'updated' 
+	else if exists (select * from inserted)
+		select @audit_action = 'inserted'
+	else
+		select @audit_action = 'deleted'
+
+
+		insert dbo.Reservation_Audit(Reservation_ID, PhoneNumber, RoomNumber, CheckinDate, CheckoutDate, @trg_username, @audit_action, @audit_timestamp)
+		select Reservation_ID, PhoneNumber, CheckinDate, CheckoutDate, @trg_username, @audit_action + '_old', @audit_timestamp
+		from deleted
+
+		insert dbo.Reservation_Audit(Reservation_ID, PhoneNumber, RoomNumber, CheckinDate, CheckoutDate, @trg_username, @audit_action, @audit_timestamp)
+		select Reservation_ID, PhoneNumber, CheckinDate, CheckoutDate, @trg_username, @audit_action + '_new', @audit_timestamp
+		from inserted
+
+end;
